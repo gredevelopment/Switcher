@@ -56,6 +56,7 @@ final class ProjectStore {
     }
 
     func addProject(
+        id: UUID = UUID(),
         name: String,
         slug: String,
         directoryPath: String,
@@ -63,16 +64,19 @@ final class ProjectStore {
         appPort: Int,
         iconName: String,
         iconColorHex: String,
+        iconStyle: ProjectIconStyle = .symbol,
         startImmediately: Bool = false
     ) {
         let project = Project(
+            id: id,
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
             slug: slug.trimmingCharacters(in: .whitespacesAndNewlines),
             directoryPath: directoryPath,
             runCommand: runCommand.trimmingCharacters(in: .whitespacesAndNewlines),
             appPort: appPort,
             iconName: iconName,
-            iconColorHex: iconColorHex
+            iconColorHex: iconColorHex,
+            iconStyle: iconStyle
         )
         projects.insert(project, at: 0)
         save()
@@ -90,6 +94,7 @@ final class ProjectStore {
 
     func deleteProject(_ project: Project) {
         stop(project)
+        ProjectIconStore.deleteImage(for: project.id)
         projects.removeAll { $0.id == project.id }
         sessions.removeValue(forKey: project.id)
         save()

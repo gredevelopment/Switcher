@@ -48,11 +48,7 @@ private struct ProjectRowContent: View {
                 .help(isSelected ? "Deselect project" : "Select project")
             }
 
-            ProjectIconTile(
-                iconName: project.iconName,
-                iconColorHex: project.iconColorHex,
-                isActive: session.state.isActive
-            )
+            ProjectIconTile(project: project, isActive: session.state.isActive)
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {

@@ -17,6 +17,9 @@ struct AddProjectView: View {
     @State private var appPortText = ""
     @State private var iconName = IconCatalog.defaultIcon
     @State private var iconColorHex = IconCatalog.defaultColorHex
+    @State private var iconStyle: ProjectIconStyle = .symbol
+    @State private var projectID = UUID()
+    @State private var iconPreviewRefreshToken = UUID()
     @State private var startImmediately = false
     @State private var validationMessage: String?
     @State private var portValidationMessage: String?
@@ -144,8 +147,15 @@ struct AddProjectView: View {
                 }
             }
             .frame(minWidth: 520, minHeight: 520)
-            .sheet(isPresented: $showingIconPicker) {
-                IconPickerView(selectedIcon: $iconName, selectedColorHex: $iconColorHex)
+            .sheet(isPresented: $showingIconPicker, onDismiss: {
+                iconPreviewRefreshToken = UUID()
+            }) {
+                IconPickerView(
+                    projectID: projectID,
+                    selectedIcon: $iconName,
+                    selectedColorHex: $iconColorHex,
+                    iconStyle: $iconStyle
+                )
             }
             .onAppear {
                 loadExisting()
@@ -165,14 +175,17 @@ struct AddProjectView: View {
         } label: {
             HStack(spacing: 14) {
                 ProjectIconTile(
+                    iconStyle: iconStyle,
+                    projectID: projectID,
                     iconName: iconName,
                     iconColorHex: iconColorHex,
-                    isActive: true
+                    isActive: true,
+                    imageRefreshToken: iconPreviewRefreshToken
                 )
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Icon & Color")
-                    Text("Tap to choose icon and color")
+                    Text("Project Icon")
+                    Text(iconStyle == .image ? "Custom image" : "Tap to choose icon and color")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -246,6 +259,9 @@ struct AddProjectView: View {
         appPortText = String(existingProject.appPort)
         iconName = existingProject.iconName
         iconColorHex = existingProject.iconColorHex
+        iconStyle = existingProject.iconStyle
+        projectID = existingProject.id
+        iconPreviewRefreshToken = UUID()
         startImmediately = false
         framework = ProjectTypeDetector.detect(
             directoryPath: existingProject.directoryPath,
@@ -327,11 +343,16 @@ struct AddProjectView: View {
                 appPort: port,
                 iconName: iconName,
                 iconColorHex: iconColorHex,
+                iconStyle: iconStyle,
                 createdAt: existingProject.createdAt
             )
+            if iconStyle == .symbol {
+                ProjectIconStore.deleteImage(for: existingProject.id)
+            }
             store.updateProject(updated)
         } else {
             store.addProject(
+                id: projectID,
                 name: name,
                 slug: trimmedSlug,
                 directoryPath: directoryPath,
@@ -339,6 +360,7 @@ struct AddProjectView: View {
                 appPort: port,
                 iconName: iconName,
                 iconColorHex: iconColorHex,
+                iconStyle: iconStyle,
                 startImmediately: startImmediately
             )
         }

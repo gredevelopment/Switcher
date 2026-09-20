@@ -1,6 +1,20 @@
 import Foundation
 import SwiftUI
 
+enum ProjectIconStyle: String, Codable, CaseIterable {
+    case symbol
+    case image
+
+    var label: String {
+        switch self {
+        case .symbol:
+            "Icon"
+        case .image:
+            "Image"
+        }
+    }
+}
+
 struct Project: Identifiable, Codable, Equatable, Hashable {
     var id: UUID
     var name: String
@@ -10,6 +24,7 @@ struct Project: Identifiable, Codable, Equatable, Hashable {
     var appPort: Int
     var iconName: String
     var iconColorHex: String
+    var iconStyle: ProjectIconStyle
     var createdAt: Date
 
     init(
@@ -21,6 +36,7 @@ struct Project: Identifiable, Codable, Equatable, Hashable {
         appPort: Int,
         iconName: String = IconCatalog.defaultIcon,
         iconColorHex: String = IconCatalog.defaultColorHex,
+        iconStyle: ProjectIconStyle = .symbol,
         createdAt: Date = .now
     ) {
         self.id = id
@@ -31,6 +47,7 @@ struct Project: Identifiable, Codable, Equatable, Hashable {
         self.appPort = appPort
         self.iconName = iconName
         self.iconColorHex = iconColorHex
+        self.iconStyle = iconStyle
         self.createdAt = createdAt
     }
 
@@ -47,7 +64,7 @@ struct Project: Identifiable, Codable, Equatable, Hashable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, slug, directoryPath, runCommand, appPort, iconName, iconColorHex, createdAt
+        case id, name, slug, directoryPath, runCommand, appPort, iconName, iconColorHex, iconStyle, createdAt
     }
 
     init(from decoder: Decoder) throws {
@@ -60,6 +77,7 @@ struct Project: Identifiable, Codable, Equatable, Hashable {
         appPort = try container.decodeIfPresent(Int.self, forKey: .appPort) ?? 0
         iconName = try container.decodeIfPresent(String.self, forKey: .iconName) ?? IconCatalog.defaultIcon
         iconColorHex = try container.decodeIfPresent(String.self, forKey: .iconColorHex) ?? IconCatalog.defaultColorHex
+        iconStyle = try container.decodeIfPresent(ProjectIconStyle.self, forKey: .iconStyle) ?? .symbol
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? .now
     }
 }
