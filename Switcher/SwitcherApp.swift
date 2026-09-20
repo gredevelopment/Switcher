@@ -14,9 +14,14 @@ struct SwitcherApp: App {
                 }
         }
         .windowStyle(.automatic)
-        .defaultSize(width: 820, height: 520)
+        .defaultSize(width: 400, height: 520)
         .commands {
-            CommandGroup(replacing: .newItem) {}
+            CommandGroup(replacing: .newItem) {
+                Button("New Project") {
+                    NotificationCenter.default.post(name: .createProject, object: nil)
+                }
+                .keyboardShortcut("n", modifiers: .command)
+            }
         }
     }
 }

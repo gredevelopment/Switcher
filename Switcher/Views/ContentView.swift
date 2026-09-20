@@ -64,21 +64,27 @@ struct ContentView: View {
                     }
                 }
             }
+            .nativeScrollEdgeChrome()
             .sheet(isPresented: $showingAddProject) {
                 AddProjectView()
             }
             .sheet(item: $projectToEdit) { project in
                 AddProjectView(existingProject: project)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                AppGlassBackground()
+                    .ignoresSafeArea()
+            }
         }
-        .frame(minWidth: 560, minHeight: 400)
-        .background {
-            AppGlassBackground()
-                .ignoresSafeArea()
-        }
-        .toolbarBackground(.hidden, for: .windowToolbar)
+        .frame(minWidth: 400, minHeight: 400)
+        .clearInitialFocusOnAppear()
         .task {
             try? PortlessProxyManager.ensureRunning()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .createProject)) { _ in
+            projectToEdit = nil
+            showingAddProject = true
         }
     }
 
@@ -97,26 +103,11 @@ struct ContentView: View {
 
     private var projectList: some View {
         List {
-            ForEach(store.projects) { project in
-                VStack(spacing: 0) {
-                    ProjectRowView(
-                        project: project,
-                        isEditingList: isEditingList,
-                        isSelected: selectedProjectIDs.contains(project.id),
-                        onToggleSelection: {
-                            toggleSelection(for: project.id)
-                        },
-                        onEdit: {
-                            projectToEdit = project
-                        }
-                    )
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-
-                    if project.id != store.projects.last?.id {
-                        FullWidthRowSeparator()
-                    }
-                }
+            ForEach(Array(store.projects.enumerated()), id: \.element.id) { index, project in
+                projectRow(
+                    for: project,
+                    showsSeparator: index < store.projects.count - 1
+                )
                 .listRowInsets(EdgeInsets())
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -128,6 +119,28 @@ struct ContentView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+    }
+
+    private func projectRow(for project: Project, showsSeparator: Bool) -> some View {
+        VStack(spacing: 0) {
+            ProjectRowView(
+                project: project,
+                isEditingList: isEditingList,
+                isSelected: selectedProjectIDs.contains(project.id),
+                onToggleSelection: {
+                    toggleSelection(for: project.id)
+                },
+                onEdit: {
+                    projectToEdit = project
+                }
+            )
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+
+            if showsSeparator {
+                FullWidthRowSeparator()
+            }
+        }
     }
 
     private func toggleSelection(for projectID: UUID) {

@@ -23,7 +23,6 @@ struct ProjectRowView: View {
 
 private struct ProjectRowContent: View {
     @Environment(ProjectStore.self) private var store
-    @Environment(\.colorScheme) private var colorScheme
 
     let project: Project
     @Bindable var session: RunningProjectSession
@@ -45,10 +44,16 @@ private struct ProjectRowContent: View {
                         .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                 }
                 .buttonStyle(.plain)
+                .focusable(false)
                 .help(isSelected ? "Deselect project" : "Select project")
             }
 
-            projectIcon
+            ProjectIconTile(
+                iconName: project.iconName,
+                iconColorHex: project.iconColorHex,
+                isActive: session.state.isActive,
+                isCrashed: session.state.isCrashed
+            )
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
@@ -75,24 +80,12 @@ private struct ProjectRowContent: View {
                     }
                 }
 
-                if session.state.isCrashed {
-                    VStack(alignment: .leading, spacing: 6) {
-                        if let errorSummary = session.lastErrorSummary {
-                            Text(errorSummary)
-                                .font(.caption)
-                                .foregroundStyle(.red)
-                                .lineLimit(3)
-                                .textSelection(.enabled)
-                        }
-
-                        Button {
-                            showingLogs = true
-                        } label: {
-                            Label("View Logs", systemImage: "doc.text.magnifyingglass")
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                    }
+                if session.state.isCrashed, let errorSummary = session.lastErrorSummary {
+                    Text(errorSummary)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .lineLimit(3)
+                        .textSelection(.enabled)
                 }
 
                 Text(project.directoryPath)
@@ -105,32 +98,37 @@ private struct ProjectRowContent: View {
             Spacer(minLength: 12)
 
             if !isEditingList {
-                HStack(spacing: 8) {
-                    if session.state.isRunning {
-                        Button {
+                HStack(spacing: 4) {
+                    if session.state.isRunning || session.state.isCrashed {
+                        IconActionButton(
+                            systemImage: "doc.text",
+                            help: session.state.isCrashed ? "View logs" : "View live logs",
+                            size: 26,
+                            iconSize: 12
+                        ) {
                             showingLogs = true
-                        } label: {
-                            Label("Logs", systemImage: "doc.text")
                         }
-                        .buttonStyle(.borderless)
-                        .help("View live logs")
+                    }
 
-                        Button {
+                    if session.state.isRunning {
+                        IconActionButton(
+                            systemImage: "safari",
+                            help: "Open in browser",
+                            size: 26,
+                            iconSize: 12
+                        ) {
                             store.openInBrowser(project)
-                        } label: {
-                            Label("Open", systemImage: "safari")
                         }
-                        .buttonStyle(.borderless)
-                        .help("Open in browser")
                     }
 
-                    Button {
+                    IconActionButton(
+                        systemImage: "gearshape",
+                        help: "Edit project",
+                        size: 26,
+                        iconSize: 12
+                    ) {
                         onEdit()
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
                     }
-                    .buttonStyle(.borderless)
-                    .help("Edit project")
 
                     Toggle(isOn: Binding(
                         get: { session.state.isActive },
@@ -146,6 +144,7 @@ private struct ProjectRowContent: View {
                     }
                     .toggleStyle(.switch)
                     .labelsHidden()
+                    .focusable(false)
                     .help(session.state.isActive ? "Stop server" : "Start server")
                 }
             }
@@ -163,27 +162,6 @@ private struct ProjectRowContent: View {
         }
     }
 
-    private var projectIcon: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(project.iconColor.opacity(session.state.isActive ? 0.2 : 0.12))
-                .frame(width: 44, height: 44)
-
-            Image(systemName: project.iconName)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(iconForegroundColor)
-        }
-    }
-
-    private var iconForegroundColor: Color {
-        if session.state.isCrashed {
-            return Color.red.iconGlyph(colorScheme: colorScheme)
-        }
-        return project.iconColor.iconGlyph(
-            colorScheme: colorScheme,
-            muted: !session.state.isActive
-        )
-    }
 }
 
 private struct StatusBadge: View {

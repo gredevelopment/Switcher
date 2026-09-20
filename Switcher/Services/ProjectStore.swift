@@ -6,18 +6,20 @@ import AppKit
 @Observable
 final class ProjectStore {
     private(set) var projects: [Project] = []
+    private(set) var settings: SwitcherSettings = .default
     private var sessions: [UUID: RunningProjectSession] = [:]
 
-    private let fileURL: URL
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
+    private let documentStore = ICloudDocumentStore()
 
     init() {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let directory = appSupport.appendingPathComponent("Switcher", isDirectory: true)
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        fileURL = directory.appendingPathComponent("projects.json")
-        load()
+        loadFromLocal()
+        documentStore.startObservingChanges { [weak self] filename in
+            self?.handleRemoteDocumentChange(filename: filename)
+        }
+        Task {
+            await documentStore.synchronizeWithICloud()
+            reloadFromLocal()
+        }
     }
 
     func session(for projectID: UUID) -> RunningProjectSession {
@@ -61,7 +63,7 @@ final class ProjectStore {
         appPort: Int,
         iconName: String,
         iconColorHex: String,
-        startImmediately: Bool = true
+        startImmediately: Bool = false
     ) {
         let project = Project(
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -153,13 +155,38 @@ final class ProjectStore {
         }
     }
 
-    private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? decoder.decode([Project].self, from: data) else {
-            return
+    func updateSettings(_ newSettings: SwitcherSettings) {
+        settings = newSettings
+        saveSettings()
+    }
+
+    private func loadFromLocal() {
+        if let loadedProjects = documentStore.loadLocal([Project].self, from: AppConstants.projectsDocumentName) {
+            projects = loadedProjects
+            migrateMissingPorts()
         }
-        projects = decoded
-        migrateMissingPorts()
+
+        settings = documentStore.loadLocal(SwitcherSettings.self, from: AppConstants.settingsDocumentName) ?? .default
+        saveSettingsIfNeeded()
+    }
+
+    private func reloadFromLocal() {
+        loadFromLocal()
+    }
+
+    private func handleRemoteDocumentChange(filename: String) {
+        switch filename {
+        case AppConstants.projectsDocumentName:
+            guard let loadedProjects = documentStore.loadLocal([Project].self, from: filename) else { return }
+            projects = loadedProjects
+            migrateMissingPorts()
+            NotificationCenter.default.post(name: .iCloudStoreChanged, object: nil)
+        case AppConstants.settingsDocumentName:
+            settings = documentStore.loadLocal(SwitcherSettings.self, from: filename) ?? .default
+            NotificationCenter.default.post(name: .iCloudStoreChanged, object: nil)
+        default:
+            break
+        }
     }
 
     private func migrateMissingPorts() {
@@ -178,7 +205,17 @@ final class ProjectStore {
     }
 
     private func save() {
-        guard let data = try? encoder.encode(projects) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        documentStore.save(projects, to: AppConstants.projectsDocumentName)
+    }
+
+    private func saveSettings() {
+        documentStore.save(settings, to: AppConstants.settingsDocumentName)
+    }
+
+    private func saveSettingsIfNeeded() {
+        guard documentStore.loadLocal(SwitcherSettings.self, from: AppConstants.settingsDocumentName) == nil else {
+            return
+        }
+        saveSettings()
     }
 }

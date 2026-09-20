@@ -3,7 +3,7 @@ import SwiftUI
 
 enum IconCatalog {
     static let defaultIcon = "folder.fill"
-    static let defaultColorHex = "#5E5CE6"
+    static let defaultColorHex = "#64D2FF"
 
     static let allIcons: [String] = {
         var icons: [String] = []
@@ -30,9 +30,9 @@ enum IconCatalog {
     }
 
     static let presetColors: [(name: String, hex: String)] = [
-        ("Indigo", "#5E5CE6"),
-        ("Blue", "#0A84FF"),
         ("Teal", "#64D2FF"),
+        ("Blue", "#0A84FF"),
+        ("Indigo", "#5E5CE6"),
         ("Green", "#30D158"),
         ("Mint", "#63E6E2"),
         ("Yellow", "#FFD60A"),
@@ -249,7 +249,7 @@ extension Color {
         return String(format: "#%02X%02X%02X", red, green, blue)
     }
 
-    /// Tuned glyph color for SF Symbols. Background tints should keep using `iconColor` directly.
+    /// Tuned glyph color for SF Symbols. Tile backgrounds should use `iconColor` directly.
     func iconGlyph(colorScheme: ColorScheme, muted: Bool = false) -> Color {
         guard let nsColor = NSColor(self).usingColorSpace(.sRGB) else { return self }
 
@@ -263,11 +263,12 @@ extension Color {
         switch colorScheme {
         case .dark:
             if saturation > 0.01 {
-                saturation = min(saturation * 1.3 + 0.12, 1)
-                let floor: CGFloat = muted ? 0.7 : 0.82
-                brightness = max(min(brightness * 0.5 + 0.48, 1), floor)
+                // Keep the chosen hue; lift lightness so pink/purple stay vivid, not muddy.
+                saturation = min(max(saturation * 0.92 + 0.06, 0.7), muted ? 0.84 : 0.96)
+                let floor: CGFloat = muted ? 0.8 : 0.92
+                brightness = max(min(brightness * 0.2 + 0.76, 1), floor)
             } else {
-                brightness = muted ? 0.58 : 0.74
+                brightness = muted ? 0.62 : 0.78
             }
         case .light:
             if saturation > 0.01 {

@@ -7,6 +7,7 @@ struct AddProjectView: View {
 
     let existingProject: Project?
 
+    @State private var showingIconPicker = false
     @State private var name = ""
     @State private var slug = ""
     @State private var slugWasEdited = false
@@ -16,9 +17,14 @@ struct AddProjectView: View {
     @State private var appPortText = ""
     @State private var iconName = IconCatalog.defaultIcon
     @State private var iconColorHex = IconCatalog.defaultColorHex
-    @State private var startImmediately = true
+    @State private var startImmediately = false
     @State private var validationMessage: String?
     @State private var portValidationMessage: String?
+    @FocusState private var focusedField: FormField?
+
+    private enum FormField: Hashable {
+        case name
+    }
 
     init(existingProject: Project? = nil) {
         self.existingProject = existingProject
@@ -30,7 +36,10 @@ struct AddProjectView: View {
         NavigationStack {
             Form {
                 Section("Project") {
+                    iconPickerRow
+
                     TextField("Name", text: $name)
+                        .focused($focusedField, equals: .name)
                         .onChange(of: name) { _, newValue in
                             syncSlugFromName(newValue)
                         }
@@ -112,10 +121,6 @@ struct AddProjectView: View {
                     }
                 }
 
-                Section("Appearance") {
-                    IconPickerView(selectedIcon: $iconName, selectedColorHex: $iconColorHex)
-                }
-
                 if let validationMessage {
                     Section {
                         Text(validationMessage)
@@ -137,14 +142,50 @@ struct AddProjectView: View {
                     .disabled(!canSave)
                 }
             }
-            .frame(minWidth: 520, minHeight: 640)
+            .frame(minWidth: 520, minHeight: 520)
+            .sheet(isPresented: $showingIconPicker) {
+                IconPickerView(selectedIcon: $iconName, selectedColorHex: $iconColorHex)
+            }
             .onAppear {
                 loadExisting()
                 if appPortText.isEmpty {
                     suggestPort()
                 }
+                DispatchQueue.main.async {
+                    focusedField = .name
+                }
             }
         }
+    }
+
+    private var iconPickerRow: some View {
+        Button {
+            showingIconPicker = true
+        } label: {
+            HStack(spacing: 14) {
+                ProjectIconTile(
+                    iconName: iconName,
+                    iconColorHex: iconColorHex,
+                    isActive: true
+                )
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Icon & Color")
+                    Text("Tap to choose icon and color")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
     }
 
     private var slugBinding: Binding<String> {
