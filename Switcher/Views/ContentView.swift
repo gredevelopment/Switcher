@@ -77,7 +77,7 @@ struct ContentView: View {
                     .ignoresSafeArea()
             }
         }
-        .frame(minWidth: 400, minHeight: 400)
+        .frame(minWidth: 450, minHeight: 400)
         .clearInitialFocusOnAppear()
         .task {
             try? PortlessProxyManager.ensureRunning()

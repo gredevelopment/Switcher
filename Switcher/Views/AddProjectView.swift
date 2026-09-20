@@ -13,7 +13,7 @@ struct AddProjectView: View {
     @State private var slugWasEdited = false
     @State private var directoryPath = ""
     @State private var runCommand = "npm run dev"
-    @State private var framework: ProjectFramework = .auto
+    @State private var framework: ProjectFramework = .standard
     @State private var appPortText = ""
     @State private var iconName = IconCatalog.defaultIcon
     @State private var iconColorHex = IconCatalog.defaultColorHex
@@ -61,12 +61,13 @@ struct AddProjectView: View {
 
                 Section("Server") {
                     Picker("Framework", selection: $framework) {
-                        ForEach(ProjectFramework.allCases) { option in
+                        ForEach(ProjectFramework.selectableCases) { option in
                             Text(option.label).tag(option)
                         }
                     }
                     .onChange(of: framework) { _, newValue in
-                        if runCommand == "npm run dev" || runCommand == "mint dev" {
+                        let defaultCommands = Set(ProjectFramework.allCases.map(\.defaultCommand))
+                        if defaultCommands.contains(runCommand) {
                             runCommand = newValue.defaultCommand
                         }
                     }
@@ -74,7 +75,7 @@ struct AddProjectView: View {
                     TextField("Run command", text: $runCommand, prompt: Text("npm run dev"))
                         .font(.body.monospaced())
 
-                    if detectedFramework == .mintlify {
+                    if framework == .mintlify {
                         Text("Mintlify ignores PORT from portless. Switcher injects --port and --no-open so the proxy can route correctly.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -207,10 +208,6 @@ struct AddProjectView: View {
         Int(appPortText.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
-    private var detectedFramework: ProjectFramework {
-        framework == .auto ? RunCommandAdapter.detectedFramework(for: runCommand) : framework
-    }
-
     private var previewCommand: String {
         let slugValue = slug.isEmpty ? "slug" : slug
         let portValue = appPort ?? 0
@@ -250,6 +247,10 @@ struct AddProjectView: View {
         iconName = existingProject.iconName
         iconColorHex = existingProject.iconColorHex
         startImmediately = false
+        framework = ProjectTypeDetector.detect(
+            directoryPath: existingProject.directoryPath,
+            runCommand: existingProject.runCommand
+        )
         validatePortField()
     }
 
@@ -272,6 +273,12 @@ struct AddProjectView: View {
         portValidationMessage = result.message
     }
 
+    private func applyDetectedFramework(for path: String) {
+        let detected = ProjectTypeDetector.detect(directoryPath: path, runCommand: runCommand)
+        framework = detected
+        runCommand = detected.defaultCommand
+    }
+
     private func chooseDirectory() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
@@ -287,6 +294,7 @@ struct AddProjectView: View {
                 slugWasEdited = false
                 syncSlugFromName(folderName)
             }
+            applyDetectedFramework(for: url.path)
         }
     }
 

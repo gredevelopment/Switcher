@@ -51,19 +51,17 @@ private struct ProjectRowContent: View {
             ProjectIconTile(
                 iconName: project.iconName,
                 iconColorHex: project.iconColorHex,
-                isActive: session.state.isActive,
-                isCrashed: session.state.isCrashed
+                isActive: session.state.isActive
             )
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
-                    if project.detectedType != .unknown {
-                        ProjectTypeLogo(type: project.detectedType)
-                            .help(project.detectedType.label)
-                    }
+                    ProjectTypeLogo(type: project.detectedType)
+                        .help(project.detectedType.label)
 
                     Text(project.name)
                         .font(.headline)
+                        .lineLimit(1)
                 }
 
                 HStack(spacing: 8) {
@@ -71,31 +69,16 @@ private struct ProjectRowContent: View {
                     Text(verbatim: ":\(project.appPort)")
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.secondary)
-
-                    if session.state.isRunning {
-                        Text(project.localhostURL.absoluteString)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                    }
-                }
-
-                if session.state.isCrashed, let errorSummary = session.lastErrorSummary {
-                    Text(errorSummary)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                        .lineLimit(3)
-                        .textSelection(.enabled)
                 }
 
                 Text(project.directoryPath)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .lineLimit(1)
-                    .truncationMode(.middle)
+                    .truncationMode(.tail)
             }
-
-            Spacer(minLength: 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .layoutPriority(1)
 
             if !isEditingList {
                 HStack(spacing: 4) {

@@ -166,7 +166,6 @@ struct ProjectIconTile: View {
     let iconName: String
     let iconColorHex: String
     var isActive: Bool = true
-    var isCrashed: Bool = false
     var size: CGFloat = 44
 
     private var iconColor: Color {
@@ -174,17 +173,14 @@ struct ProjectIconTile: View {
     }
 
     private var glyphColor: Color {
-        if isCrashed {
-            return Color.red.iconGlyph(colorScheme: colorScheme)
-        }
-        return iconColor.iconGlyph(colorScheme: colorScheme, muted: !isActive)
+        iconColor.iconGlyph(colorScheme: colorScheme, muted: !isActive)
     }
 
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(
-                    (isCrashed ? Color.red : iconColor)
+                    iconColor
                         .opacity(isActive ? 0.2 : 0.12)
                 )
                 .frame(width: size, height: size)

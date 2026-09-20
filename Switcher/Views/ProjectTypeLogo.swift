@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ProjectTypeLogo: View {
-    let type: DetectedProjectType
+    let type: ProjectFramework
     var size: CGFloat = 14
 
     var body: some View {

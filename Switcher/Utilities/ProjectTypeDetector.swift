@@ -1,70 +1,7 @@
 import Foundation
 
-enum DetectedProjectType: String, CaseIterable, Equatable {
-    case nextjs
-    case mintlify
-    case astro
-    case nuxt
-    case remix
-    case svelte
-    case vite
-    case angular
-    case laravel
-    case unknown
-
-    var label: String {
-        switch self {
-        case .nextjs:
-            "Next.js"
-        case .mintlify:
-            "Mintlify"
-        case .astro:
-            "Astro"
-        case .nuxt:
-            "Nuxt"
-        case .remix:
-            "Remix"
-        case .svelte:
-            "SvelteKit"
-        case .vite:
-            "Vite"
-        case .angular:
-            "Angular"
-        case .laravel:
-            "Laravel"
-        case .unknown:
-            "Project"
-        }
-    }
-
-    var assetName: String? {
-        switch self {
-        case .nextjs:
-            "FrameworkNextJS"
-        case .mintlify:
-            "FrameworkMintlify"
-        case .astro:
-            "FrameworkAstro"
-        case .nuxt:
-            "FrameworkNuxt"
-        case .remix:
-            "FrameworkRemix"
-        case .svelte:
-            "FrameworkSvelte"
-        case .vite:
-            "FrameworkVite"
-        case .angular:
-            "FrameworkAngular"
-        case .laravel:
-            "FrameworkLaravel"
-        case .unknown:
-            nil
-        }
-    }
-}
-
 enum ProjectTypeDetector {
-    static func detect(directoryPath: String, runCommand: String) -> DetectedProjectType {
+    static func detect(directoryPath: String, runCommand: String) -> ProjectFramework {
         let directory = URL(fileURLWithPath: directoryPath, isDirectory: true)
         let command = runCommand.lowercased()
         let packageJSON = loadPackageJSON(at: directory)
@@ -80,6 +17,12 @@ enum ProjectTypeDetector {
             || hasNextConfig(in: directory)
             || dependencies.contains("next") {
             return .nextjs
+        }
+
+        if RunCommandAdapter.isReactNativeCommand(runCommand)
+            || fileExists(named: "react-native.config.js", in: directory)
+            || dependencies.contains("react-native") {
+            return .reactNative
         }
 
         if command.contains("astro")
@@ -125,7 +68,7 @@ enum ProjectTypeDetector {
             return .vite
         }
 
-        return .unknown
+        return RunCommandAdapter.detectedFramework(for: runCommand)
     }
 
     private static func loadPackageJSON(at directory: URL) -> [String: Any]? {
@@ -172,7 +115,7 @@ enum ProjectTypeDetector {
 }
 
 extension Project {
-    var detectedType: DetectedProjectType {
+    var detectedType: ProjectFramework {
         ProjectTypeDetector.detect(directoryPath: directoryPath, runCommand: runCommand)
     }
 }

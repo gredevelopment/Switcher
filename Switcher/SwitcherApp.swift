@@ -14,7 +14,7 @@ struct SwitcherApp: App {
                 }
         }
         .windowStyle(.automatic)
-        .defaultSize(width: 400, height: 520)
+        .defaultSize(width: 450, height: 520)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Project") {
