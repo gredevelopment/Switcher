@@ -68,6 +68,16 @@ enum ProjectTypeDetector {
             return .vite
         }
 
+        if RunCommandAdapter.isRustCommand(runCommand)
+            || fileExists(named: "Cargo.toml", in: directory) {
+            return .rust
+        }
+
+        if RunCommandAdapter.isGoCommand(runCommand)
+            || fileExists(named: "go.mod", in: directory) {
+            return .go
+        }
+
         return RunCommandAdapter.detectedFramework(for: runCommand)
     }
 

@@ -113,27 +113,40 @@ private struct LogLineView: View {
                 .foregroundStyle(.tertiary)
                 .frame(width: 64, alignment: .leading)
 
-            Text(line.stream == .stderr ? "ERR" : line.stream == .system ? "SYS" : "OUT")
+            Text(line.displayTag)
                 .font(.caption2.weight(.semibold).monospaced())
-                .foregroundStyle(streamColor)
+                .foregroundStyle(tagColor)
                 .frame(width: 28, alignment: .leading)
 
             Text(line.text.isEmpty ? " " : line.text)
                 .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(line.stream == .stderr ? .red : .primary)
+                .foregroundStyle(textColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 2)
     }
 
-    private var streamColor: Color {
-        switch line.stream {
-        case .stderr:
+    private var tagColor: Color {
+        switch line.displayKind {
+        case .output:
+            .secondary
+        case .warning:
+            .orange
+        case .error:
             .red
         case .system:
             .orange
-        case .stdout:
-            .secondary
+        }
+    }
+
+    private var textColor: Color {
+        switch line.displayKind {
+        case .output, .system:
+            .primary
+        case .warning:
+            .orange
+        case .error:
+            .red
         }
     }
 }

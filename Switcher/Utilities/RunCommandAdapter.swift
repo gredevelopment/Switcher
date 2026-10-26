@@ -12,6 +12,8 @@ enum ProjectFramework: String, CaseIterable, Identifiable, Equatable {
     case vite
     case angular
     case laravel
+    case go
+    case rust
 
     var id: String { rawValue }
 
@@ -43,6 +45,10 @@ enum ProjectFramework: String, CaseIterable, Identifiable, Equatable {
             "Angular"
         case .laravel:
             "Laravel"
+        case .go:
+            "Go"
+        case .rust:
+            "Rust"
         }
     }
 
@@ -70,6 +76,10 @@ enum ProjectFramework: String, CaseIterable, Identifiable, Equatable {
             "FrameworkAngular"
         case .laravel:
             "FrameworkLaravel"
+        case .go:
+            "FrameworkGo"
+        case .rust:
+            "FrameworkRust"
         }
     }
 
@@ -85,6 +95,10 @@ enum ProjectFramework: String, CaseIterable, Identifiable, Equatable {
             "ng serve"
         case .laravel:
             "php artisan serve"
+        case .go:
+            "go run ."
+        case .rust:
+            "cargo run"
         }
     }
 }
@@ -120,6 +134,12 @@ enum RunCommandAdapter {
         if lowered.contains("artisan serve") {
             return .laravel
         }
+        if isRustCommand(command) {
+            return .rust
+        }
+        if isGoCommand(command) {
+            return .go
+        }
         if lowered.contains("vite") {
             return .vite
         }
@@ -146,6 +166,18 @@ enum RunCommandAdapter {
     static func isReactNativeCommand(_ command: String) -> Bool {
         let pattern = #"(?:^|\s)(?:npx\s+)?react-native(?:\s|$)"#
         return command.range(of: pattern, options: .regularExpression) != nil
+    }
+
+    static func isGoCommand(_ command: String) -> Bool {
+        let lowered = command.lowercased()
+        if lowered.range(of: #"(?:^|\s)go\s+run(?:\s|$)"#, options: .regularExpression) != nil {
+            return true
+        }
+        return lowered.range(of: #"(?:^|\s)air(?:\s|$)"#, options: .regularExpression) != nil
+    }
+
+    static func isRustCommand(_ command: String) -> Bool {
+        command.range(of: #"(?:^|\s)cargo(?:\s|$)"#, options: .regularExpression) != nil
     }
 
     private static func adaptMintlify(_ command: String, appPort: Int) -> String {

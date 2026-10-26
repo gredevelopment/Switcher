@@ -188,7 +188,7 @@ final class RunningProjectSession {
         guard case .crashed = state else { return nil }
 
         let meaningful = logs.filter { line in
-            !line.text.isEmpty && line.stream != .stdout
+            !line.text.isEmpty && line.displayKind == .error
         }
 
         if let last = meaningful.last {
