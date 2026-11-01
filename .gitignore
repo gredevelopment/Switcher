@@ -1,8 +1,21 @@
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Local editor / IDE (not part of the shipped app)
 .cursor/
+.idea/
+*.swp
+*~
+
+# Xcode
 *.xcodeproj
+*.xcworkspace
 xcuserdata/
 DerivedData/
 .derivedData/
 build/
-*.xcworkspace
+
+# macOS packaging / archives
+*.dmg
+*.zip
