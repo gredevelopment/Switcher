@@ -12,14 +12,25 @@ Switcher is a macOS app for running multiple local web projects through [portles
 - Optional sync of project data via iCloud Documents (when enabled in a signed build)
 - Clean shutdown of background processes when you quit the app
 
+## Download
+
+Pre-built releases (`.dmg`) are on the [Releases](https://github.com/gre-dev/Switcher/releases) page. Install by opening the DMG and dragging **Switcher** to **Applications**.
+
+You still need [portless](https://github.com/vercel-labs/portless) installed separately.
+
 ## Requirements
 
 - macOS 14 or later
-- [Xcode](https://developer.apple.com/xcode/) 16 or later (to build from source)
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
-- [portless](https://github.com/vercel-labs/portless) installed and available on your `PATH` ([npm](https://www.npmjs.com/package/portless))
+- [portless](https://github.com/vercel-labs/portless) on your `PATH` ([npm](https://www.npmjs.com/package/portless))
 
 ## Build from source
+
+Contributors and developers can build locally with:
+
+- [Xcode](https://developer.apple.com/xcode/) 16 or later
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
+
+See [docs/RELEASE.md](docs/RELEASE.md) for signed release and DMG steps.
 
 ```bash
 git clone https://github.com/gre-dev/Switcher.git
@@ -28,7 +39,7 @@ xcodegen generate
 open Switcher.xcodeproj
 ```
 
-Build and run the **Switcher** scheme in Xcode. For local development you can use ad hoc signing or your own Apple Development team in `project.yml`.
+Build and run the **Switcher** scheme in Xcode.
 
 ## Using Switcher
 
@@ -45,7 +56,9 @@ Project list and settings are stored locally under Application Support. iCloud s
 |------|---------|
 | `Switcher/` | SwiftUI app source |
 | `project.yml` | XcodeGen project definition |
-| `Switcher/Switcher.entitlements` | App entitlements (configure for iCloud when signing) |
+| `docs/RELEASE.md` | Maintainer release and DMG pipeline |
+| `ExportOptions.plist` | Developer ID export options for `xcodebuild -exportArchive` |
+| `scripts/release.sh` | Archive, export, and DMG helper script |
 
 Generated `Switcher.xcodeproj` is not committed; run `xcodegen generate` after cloning.
 
