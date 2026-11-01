@@ -1,6 +1,6 @@
 # Switcher
 
-Switcher is a macOS app for running multiple local web projects through [portless](https://github.com/portless-dev/portless). It starts and stops dev servers, manages the portless HTTPS proxy, and gives each project a stable URL like `https://your-slug.localhost:1355`.
+Switcher is a macOS app for running multiple local web projects through [portless](https://github.com/vercel-labs/portless). It starts and stops dev servers, manages the portless HTTPS proxy, and gives each project a stable URL like `https://your-slug.localhost:1355`.
 
 ## Features
 
@@ -17,7 +17,7 @@ Switcher is a macOS app for running multiple local web projects through [portles
 - macOS 14 or later
 - [Xcode](https://developer.apple.com/xcode/) 16 or later (to build from source)
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
-- [portless](https://www.npmjs.com/package/portless) installed and available on your `PATH`
+- [portless](https://github.com/vercel-labs/portless) installed and available on your `PATH` ([npm](https://www.npmjs.com/package/portless))
 
 ## Build from source
 
@@ -32,7 +32,7 @@ Build and run the **Switcher** scheme in Xcode. For local development you can us
 
 ## Using Switcher
 
-1. Install portless if you have not already (`npm install -g portless` or your preferred method).
+1. Install portless if you have not already — see the [portless README](https://github.com/vercel-labs/portless#install) (`npm install -g portless` is the usual approach).
 2. Launch Switcher and add a project: choose the project folder and the command you normally use to start the dev server (for example `npm run dev`).
 3. Switcher assigns an app port in the 4000–4999 range and builds the portless command for you.
 4. Start the project; Switcher ensures the portless proxy is running on port **1355** (HTTPS) and opens the project’s `https://<slug>.localhost:1355` URL when appropriate.
