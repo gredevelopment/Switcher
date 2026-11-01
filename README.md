@@ -22,7 +22,7 @@ You still need [portless](https://github.com/vercel-labs/portless) installed sep
 
 Release builds are Developer ID–signed but may not be notarized yet. If macOS says the app **cannot be checked for malicious software**, use the app in **Applications** (after copying it out of the DMG):
 
-1. **Right-click** (or **Control-click**) **Switcher.app** — click the application, not the disk image.
+1. **Right-click** (or **Control-click**) **Switcher.app**: click the application, not the disk image.
 2. Choose **Open** from the menu (not double-clicking the icon).
 3. In the dialog, click **Open** again to confirm.
 
@@ -53,7 +53,7 @@ Build and run the **Switcher** scheme in Xcode.
 
 ## Using Switcher
 
-1. Install portless if you have not already — see the [portless README](https://github.com/vercel-labs/portless#install) (`npm install -g portless` is the usual approach).
+1. Install portless if you have not already; see the [portless README](https://github.com/vercel-labs/portless#install) (`npm install -g portless` is the usual approach).
 2. Launch Switcher and add a project: choose the project folder and the command you normally use to start the dev server (for example `npm run dev`).
 3. Switcher assigns an app port in the 4000–4999 range and builds the portless command for you.
 4. Start the project; Switcher ensures the portless proxy is running on port **1355** (HTTPS) and opens the project’s `https://<slug>.localhost:1355` URL when appropriate.
@@ -78,4 +78,4 @@ Issues and pull requests are welcome. Please keep changes focused and match exis
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

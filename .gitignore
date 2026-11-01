@@ -3,7 +3,10 @@
 .LSOverride
 
 # Local editor / IDE (not part of the shipped app)
-.cursor/
+.cursor/*
+!.cursor/rules/
+.cursor/rules/*
+!.cursor/rules/no-em-dashes.mdc
 .idea/
 *.swp
 *~

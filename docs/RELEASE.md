@@ -78,4 +78,4 @@ gh release create v1.0.0 "build/Switcher-1.0.0.dmg" \
   --notes "See repository README for requirements and usage."
 ```
 
-DMG files are listed in `.gitignore` and should not be committed to git—only attached to releases.
+DMG files are listed in `.gitignore` and should not be committed to git; only attach them to releases.

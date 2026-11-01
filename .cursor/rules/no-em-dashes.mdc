@@ -1,0 +1,10 @@
+---
+description: Do not use em dashes in project text
+alwaysApply: true
+---
+
+# No em dashes
+
+Never use the Unicode em dash (U+2014) in any files, commits, or documentation for this project.
+
+Use a regular hyphen (-), a comma, or a rephrased sentence instead, whichever reads most naturally.
