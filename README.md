@@ -18,6 +18,16 @@ Pre-built releases (`.dmg`) are on the [Releases](https://github.com/gre-dev/Swi
 
 You still need [portless](https://github.com/vercel-labs/portless) installed separately.
 
+### If macOS blocks the app (Gatekeeper)
+
+Release builds are Developer ID–signed but may not be notarized yet. If macOS says the app **cannot be checked for malicious software**, use the app in **Applications** (after copying it out of the DMG):
+
+1. **Right-click** (or **Control-click**) **Switcher.app** — click the application, not the disk image.
+2. Choose **Open** from the menu (not double-clicking the icon).
+3. In the dialog, click **Open** again to confirm.
+
+macOS remembers this choice for Switcher on your Mac, so you can open it normally next time.
+
 ## Requirements
 
 - macOS 14 or later
